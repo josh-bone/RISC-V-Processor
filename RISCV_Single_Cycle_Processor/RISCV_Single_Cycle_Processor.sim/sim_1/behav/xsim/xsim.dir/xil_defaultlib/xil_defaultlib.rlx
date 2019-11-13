@@ -1,0 +1,8 @@
+0.6
+2018.2
+Jun 14 2018
+20:07:38
+/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.sim/sim_1/behav/xsim/glbl.v,1529022455,verilog,,,,glbl,,,,,,,,
+/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.srcs/sources_1/imports/src/decode_tb.v,1553459492,verilog,,,,decode_tb,,,,,,,,
+/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.srcs/sources_1/imports/src/fetch.v,1573674056,verilog,,/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.srcs/sources_1/imports/src/fetch_tb.v,,fetch,,,,,,,,
+/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.srcs/sources_1/imports/src/fetch_tb.v,1573673954,verilog,,,,fetch_tb,,,,,,,,

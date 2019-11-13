@@ -1,0 +1,4 @@
+INFO: [VRFC 10-2263] Analyzing Verilog file "/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.srcs/sources_1/imports/src/fetch.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fetch
+INFO: [VRFC 10-2263] Analyzing Verilog file "/ad/eng/users/j/s/jshall/Documents/EC413/Final Project/RISCV_Single_Cycle_Processor/RISCV_Single_Cycle_Processor.srcs/sources_1/imports/src/fetch_tb.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fetch_tb
