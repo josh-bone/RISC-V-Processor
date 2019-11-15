@@ -1,5 +1,5 @@
-// Name: Joshua Bone
-// BU ID: U22742355
+// Name: Joshua Bone, Jonathan Hall
+// BU ID: U22742355, U21798292
 
 module regFile (
   input clock,

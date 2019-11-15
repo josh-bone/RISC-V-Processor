@@ -1,5 +1,5 @@
-// Joshua Bone, Jon Hall
-// BU ID: U22742355, U??
+// Joshua Bone, Jonathan Hall
+// BU ID: U22742355, U21798292
 // EC413 Lab 2 Problem 2: ALU
 
 module ALU (
@@ -23,6 +23,8 @@ always @(*)
             6'b010101 : branch = $signed(operand_A) >= $signed(operand_B);  //BGE
             6'b010110 : branch = operand_A < operand_B;                     //BLTU
             6'b010111 : branch = operand_A >= operand_B;                    //BGEU        
+            6'b010000 : result = operand_A == operand_B;    //BEQ  <- these should 
+            6'b010001 : result = operand_A != operand_B;    //BNE
         endcase
     end else begin
         casez (ALU_Control) //treats z as "don't care"
@@ -31,8 +33,7 @@ always @(*)
             
             6'bz11111 : result = operand_A;                 //JAL/JALR, both pass operand_A
             
-            6'b010000 : result = operand_A == operand_B;    //BEQ
-            6'b010001 : result = operand_A != operand_B;    //BNE
+
             
             6'b000010 : result = operand_A < operand_B;                     //SLTU
             6'b00001z : result = $signed(operand_A) < $signed(operand_B);   //SLT, SLTIU
