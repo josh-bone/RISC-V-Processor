@@ -1,5 +1,5 @@
 // Name: Josh Bone, Jonathan Hall
-// BU ID: U, U21798292
+// BU ID: U22742355, U21798292
 // EC413 Project: Decode Module
 
 module decode #(
@@ -24,17 +24,17 @@ module decode #(
   output wEn,    //write enable
 
   // Outputs to Execute/ALU   - 
-  output branch_op, // Tells ALU if this is a branch instruction -- I THINK
+  output branch_op, // Tells ALU if this is a branch instruction (yes)
   output [31:0] imm32,  //the immediate
-  output [1:0] op_A_sel,  //A select for the A entry into ALU ??
-  output op_B_sel,  //B select for B entry itno ALU (0 for from read Data 2, 1 for Imm32)
+  output [1:0] op_A_sel,  //Select for the ALU operand_A input (00 for read_data_1, 01 for PC, 10 for PC+4)
+  output op_B_sel,  //Select for ALU operand_B input (0 for from read Data 2, 1 for Imm32)
   output [5:0] ALU_Control, //tells ALU operation
 
   // Outputs to Memory
   output mem_wEn, //write to memory
 
   // Outputs to Writeback
-  output wb_sel //read from memory
+  output wb_sel //1 if writeback value is read from memory 0 if writeback value comes from ALU
 
 );
 
@@ -55,7 +55,7 @@ wire[6:0]  s_imm_msb;
 wire[4:0]  s_imm_lsb;
 wire[19:0] u_imm;
 wire[11:0] i_imm_orig;
-wire[19:0] uj_imm;
+//wire[19:0] uj_imm;
 wire[11:0] s_imm_orig;
 wire[12:0] sb_imm_orig;
 
@@ -104,15 +104,30 @@ assign branch_op = Branch_reg;
 reg BranchTrue;
 assign branch = BranchTrue;
 reg [1:0] ALU_A;
-assign op_A_sel = ALU_B;
+assign op_A_sel = ALU_A;
 reg [5:0] ALU_C;
 assign ALU_Control = ALU_C;
+reg [31:0] imm_extended;
+assign imm32 = imm_extended;
+
+//I-type imm's
+assign i_imm_orig = instruction[31:20];
+assign i_imm_32 = {{20{i_imm_orig[11]}},i_imm_orig};
+//S-type imm's
+assign s_imm_msb = instruction[31:25];
+assign s_imm_lsb = instruction[11:7];
+assign s_imm_orig = {s_imm_msb, s_imm_lsb};
+assign s_imm_32 = {{20{s_imm_orig[11]}},s_imm_orig};
+//U-type imm's
+assign u_imm = instruction[31:12];
+assign u_imm_32 = { {12{u_imm[19]}},u_imm };
+//imm for JAL (really wonky)
+assign uj_imm_32 = { {11{u_imm[19]}},{u_imm[19]},{u_imm[7:0]},{u_imm[8]},{u_imm[18:9]},1'b0 }; //NOT CURRENTLY WORKING PROPERLY!!
+
+
 //first my thinking is that we check what type of instruction it is:
-
-
 always @(*) 
 begin
-
     case(opcode)
          R_TYPE: begin
                     Branch_reg <= 0;
@@ -126,6 +141,7 @@ begin
          I_TYPE: begin
                     regWrite <= 1;
                     Branch_reg = 0;
+                    imm_extended <= i_imm_32;
                     ALU_B <= 1; //read in from IMM32
                     ALU_A <= 2'b00; //read in from Reg data 1
                     WBSEL <= 0;
@@ -134,6 +150,7 @@ begin
          STORE: begin
                     regWrite <= 0;
                     Branch_reg <= 0;
+                    imm_extended <= s_imm_32;
                     ALU_B <= 1; //read in from IMM32
                     ALU_A <= 2'b00; //read in from Reg data 1
                     WBSEL <= WBSEL; //doesn't matter
@@ -142,6 +159,7 @@ begin
          LOAD: begin
                     regWrite <= 1;
                     Branch_reg <= 0;
+                    imm_extended <= i_imm_32;
                     ALU_B <= 1; //read in from IMM32
                     ALU_A <= 2'b00; //read in from reg data 1
                     WBSEL <= 1; //write back data from MEMORY
@@ -158,6 +176,7 @@ begin
          JALR: begin
                     regWrite <= 1;
                     Branch_reg <= 0;
+                    imm_extended <= i_imm_32;
                     ALU_B <= 1; //read in from IMM32
                     ALU_A <= 2'b00; //read in from reg data 1
                     WBSEL <= 0; //WB data from ALU
@@ -166,6 +185,7 @@ begin
          JAL: begin
                     regWrite <= 1;
                     Branch_reg <=0;
+                    imm_extended <= uj_imm_32;
                     ALU_B <= 1; //read in from IMM32
                     ALU_A <= 2'b10; //read PC+4
                     WBSEL <= 0; //WB from ALU
@@ -174,6 +194,7 @@ begin
          AUIPC: begin
                     regWrite <= 1;
                     Branch_reg <= 0;
+                    imm_extended <= u_imm_32;
                     ALU_B <= 1; //read in from Imm32
                     ALU_A <= 2'b01 ; //read PC
                     WBSEL <= 0; //WB from ALU
@@ -182,6 +203,7 @@ begin
          LUI: begin
                     regWrite <= 1;
                     Branch_reg <= 0;
+                    imm_extended <= u_imm_32;
                     ALU_B <= 1; //read in from IMM32
                     ALU_A <= 2'b00; //NOTE this value should be 0!
                     WBSEL <= 0; //WB from ALU
