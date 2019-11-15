@@ -7,7 +7,7 @@ module ALU (
   input [31:0] operand_A,
   input [31:0] operand_B,
   input branch_op,
-  output reg branch,
+  output ALU_branch,
   output [31:0] ALU_result
 );
 
@@ -15,6 +15,10 @@ module ALU (
 *                      Start Your Code Here
 ******************************************************************************/
 reg [31:0] result;
+reg branch;
+
+assign ALU_result = result;
+assign ALU_branch = branch;
 
 always @(*)
     if(branch_op) begin
@@ -23,8 +27,10 @@ always @(*)
             6'b010101 : branch = $signed(operand_A) >= $signed(operand_B);  //BGE
             6'b010110 : branch = operand_A < operand_B;                     //BLTU
             6'b010111 : branch = operand_A >= operand_B;                    //BGEU        
-            6'b010000 : result = operand_A == operand_B;    //BEQ  <- these should 
-            6'b010001 : result = operand_A != operand_B;    //BNE
+            6'b010000 : branch = operand_A == operand_B;                    //BEQ  
+            6'b010001 : branch = operand_A != operand_B;                    //BNE
+            
+            default: result = 32'hFFFFFFFF;                 //de facto error code
         endcase
     end else begin
         casez (ALU_Control) //treats z as "don't care"
@@ -33,10 +39,8 @@ always @(*)
             
             6'bz11111 : result = operand_A;                 //JAL/JALR, both pass operand_A
             
-
-            
-            6'b000010 : result = operand_A < operand_B;                     //SLTU
-            6'b00001z : result = $signed(operand_A) < $signed(operand_B);   //SLT, SLTIU
+            6'b000010 : result = $signed(operand_A) < $signed(operand_B);   //SLT, SLTI
+            6'b000011 : result = operand_A < operand_B;                     //SLTIU, SLTU
             
             6'b000100 : result = operand_A ^ operand_B;     //XOR, XORI
             6'b000110 : result = operand_A | operand_B;     //ORI
@@ -45,10 +49,8 @@ always @(*)
             6'b000101 : result = operand_A >> operand_B;    //SRLI, Logical shift right immediate
             6'b001101 : result = operand_A >>> operand_B;   //SRAI, Arithmetic shift right immediate
             
-            //see if there is an ALU error code for default case
+            default: result = 32'hFFFFFFFF;                 //de facto error code
         endcase
     end
-
-assign ALU_result = result;
 
 endmodule
