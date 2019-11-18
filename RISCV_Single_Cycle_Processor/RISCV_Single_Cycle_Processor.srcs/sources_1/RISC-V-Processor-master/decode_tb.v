@@ -184,9 +184,13 @@ initial begin
   $display("jalr ra,196(ra)");
   print_state();
   
+  /******************************************************************************
+  *                     Add Test Cases Here
+  ******************************************************************************/
   
   //BRANCH INSTRUCTION TEST 1 - B not taken.
   PC = 16'h0004;
+  branch = 0;
   instruction = 32'h00208863;
   
   #10
@@ -194,11 +198,34 @@ initial begin
   print_state();
   
   
+  //BRANCH INSTRUCTION TEST 2 - B taken
+  PC = 16'h0008;
+  branch = 1;
+  instruction = 32'h00208863;
+  
+  #10
+  $display("BEQ x1, x2 - taken");
+  print_state();
+  
+  
+  //LUI instruction
+  PC = 16'h0000;
+  branch = 0;
+  instruction = 32'hDEADB1B7; //LOAD DEADB into r1, as upper immediate
+  
+  #10
+  $display("LUI rd, DEADB");
+  print_state();
 
-/******************************************************************************
-*                     Add Test Cases Here
-******************************************************************************/
+  
+  //AUIPC instruction
+  //add ADD DEADB (uppIMM) to PC
+  PC = 16'h0004;
+  instruction = 32'hDEADB197;
 
+  #10
+  $display("AUIPC rd, DEADB (Note PC = 0004 to begin");
+  print_state();
   #10
   $stop();
 end
