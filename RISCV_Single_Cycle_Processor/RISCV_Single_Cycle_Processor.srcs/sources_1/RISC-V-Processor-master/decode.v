@@ -137,8 +137,8 @@ assign op_A_sel = (opcode === R_TYPE)? 2'b00:
              (opcode === STORE) ? 2'b00:
              (opcode === LOAD) ? 2'b00:
              (opcode === BRANCH) ? 2'b00:
-             (opcode === JAL) ? 2'b10:
-             (opcode === JALR) ? 2'b00:
+             (opcode === JAL) ? 2'b10:  //put PC+4 in rd
+             (opcode === JALR) ? 2'b10: //put PC+4 in rd
              (opcode === LUI) ? 2'b00: //NOTE this value should be 0!
              (opcode === AUIPC) ? 2'b01:
               2'b00;
@@ -192,6 +192,8 @@ assign ALU_Control = (opcode === R_TYPE & funct3 === 3'b000 & funct7 === 7'b0100
                      6'b000000;           
 
 //assignment statement for TARGET_PC
-assign target_PC = imm32;                       
-
+assign target_PC = (opcode === JALR) ? JALR_target: //targetPC for JALR instructions (PC + RS1) 
+                    (opcode == BRANCH) ? imm32*4:
+                    imm32 + (PC+4);
+                       
 endmodule

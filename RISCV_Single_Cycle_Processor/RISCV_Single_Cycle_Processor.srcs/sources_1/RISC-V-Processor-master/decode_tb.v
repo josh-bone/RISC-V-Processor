@@ -176,12 +176,21 @@ initial begin
   $display("jal	zero,128");
   print_state();
 
-  JALR_target = 16'h0154;
-  PC = 16'h0094;
+  JALR_target = 16'h0154; //JALR is given to use, don't worry about it right now
+  PC = 16'h0094;  //PC is also given to us.
   instruction = 32'h0c4080e7; // jalr ra,196(ra) (should jump to ra+0x196)
 
   #10
   $display("jalr ra,196(ra)");
+  print_state();
+  
+  
+  //BRANCH INSTRUCTION TEST 1 - B not taken.
+  PC = 16'h0004;
+  instruction = 32'h00208863;
+  
+  #10
+  $display("BEQ x1, x2");
   print_state();
   
   
