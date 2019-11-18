@@ -1,5 +1,5 @@
 // Name: Josh Bone, Jonathan Hall
-// BU ID: U, U21798292
+// BU ID: U22742355, U21798292
 // EC413 Project: Decode Module
 
 module decode #(
@@ -24,17 +24,17 @@ module decode #(
   output wEn,    //write enable
 
   // Outputs to Execute/ALU   - 
-  output branch_op, // Tells ALU if this is a branch instruction -- I THINK
+  output branch_op, // Tells ALU if this is a branch instruction (yes)
   output [31:0] imm32,  //the immediate
-  output [1:0] op_A_sel,  //A select for the A entry into ALU ??
-  output op_B_sel,  //B select for B entry itno ALU (0 for from read Data 2, 1 for Imm32)
+  output [1:0] op_A_sel,  //Select for the ALU operand_A input (00 for read_data_1, 01 for PC, 10 for PC+4)
+  output op_B_sel,  //Select for ALU operand_B input (0 for from read Data 2, 1 for Imm32)
   output [5:0] ALU_Control, //tells ALU operation
 
   // Outputs to Memory
   output mem_wEn, //write to memory
 
   // Outputs to Writeback
-  output wb_sel //read from memory
+  output wb_sel //1 if writeback value is read from memory 0 if writeback value comes from ALU
 
 );
 
@@ -55,7 +55,7 @@ wire[6:0]  s_imm_msb;
 wire[4:0]  s_imm_lsb;
 wire[19:0] u_imm;
 wire[11:0] i_imm_orig;
-wire[19:0] uj_imm;
+//wire[19:0] uj_imm;
 wire[11:0] s_imm_orig;
 wire[12:0] sb_imm_orig;
 
@@ -91,160 +91,109 @@ assign write_sel = instruction[11:7];
 ******************************************************************************/
 //first assigning values that are input regardless of instruction type
 
-reg regWrite;
-assign wEn = regWrite;
-reg ALU_B;
-assign op_B_sel = ALU_B;
-reg WBSEL;
-assign wb_sel = WBSEL;
-reg memWrite;
-assign mem_wEn = memWrite;
-reg Branch_reg;
-assign branch_op = Branch_reg;
-reg BranchTrue;
-assign branch = BranchTrue;
-reg [1:0] ALU_A;
-assign op_A_sel = ALU_B;
-reg [5:0] ALU_C;
-assign ALU_Control = ALU_C;
-//first my thinking is that we check what type of instruction it is:
+//I-type imm's
+assign i_imm_orig = instruction[31:20];
+assign i_imm_32 = {{20{i_imm_orig[11]}},i_imm_orig};
+//S-type imm's
+assign s_imm_msb = instruction[31:25];
+assign s_imm_lsb = instruction[11:7];
+assign s_imm_orig = {s_imm_msb, s_imm_lsb};
+assign s_imm_32 = {{20{s_imm_orig[11]}},s_imm_orig};
+//U-type imm's
+assign u_imm = instruction[31:12];
+assign u_imm_32 = { {12{u_imm[19]}},u_imm };
+//imm for JAL (really wonky)
+assign uj_imm_32 = { {11{u_imm[19]}},{u_imm[19]},{u_imm[7:0]},{u_imm[8]},{u_imm[18:9]},1'b0 }; //NOT CURRENTLY WORKING PROPERLY!!
 
+assign next_PC_select = (branch===1) ? 1'b1:
+                        (opcode===JAL) ? 1'b1:
+                        (opcode===JALR) ? 1'b1:
+                        1'b0;
 
-always @(*) 
-begin
+assign wEn = (opcode === R_TYPE)? 1'b1:
+             (opcode === I_TYPE)? 1'b1:
+             (opcode === STORE) ? 1'b0:
+             (opcode === LOAD) ? 1'b1:
+             (opcode === BRANCH) ? 1'b0:
+             (opcode === JAL) ? 1'b1:
+             (opcode === JALR) ? 1'b1:
+             (opcode === LUI) ? 1'b1:
+             (opcode === AUIPC) ? 1'b1:
+             1'b0;
+             
+assign op_B_sel= (opcode === R_TYPE)? 1'b0:
+                 (opcode === I_TYPE)? 1'b1:
+                 (opcode === STORE) ? 1'b1:
+                 (opcode === LOAD) ? 1'b1:
+                 (opcode === BRANCH) ? 1'b0:
+                 (opcode === JAL) ? 1'b1:
+                 (opcode === JALR) ? 1'b1:
+                 (opcode === LUI) ? 1'b1:
+                 (opcode === AUIPC) ? 1'b1:
+                 1'b0;
+                 
+assign op_A_sel = (opcode === R_TYPE)? 2'b00:
+             (opcode === I_TYPE)? 2'b00:
+             (opcode === STORE) ? 2'b00:
+             (opcode === LOAD) ? 2'b00:
+             (opcode === BRANCH) ? 2'b00:
+             (opcode === JAL) ? 2'b10:  //put PC+4 in rd
+             (opcode === JALR) ? 2'b10: //put PC+4 in rd
+             (opcode === LUI) ? 2'b00: //NOTE this value should be 0!
+             (opcode === AUIPC) ? 2'b01:
+              2'b00;
+              
+assign branch_op= (opcode === BRANCH) ? 1'b1: //tell ALU this is a branch instruction
+             1'b0;
+             
+assign mem_wEn = (opcode === STORE) ? 1'b1: //only store to memory if mem_wEn is 1
+             1'b0;
+             
+assign wb_sel = (opcode === LOAD) ? 1'b1: //only write back from memory if LOAD instruction
+             1'b0;
+             
+assign imm32 = (opcode == I_TYPE) ? i_imm_32:
+               (opcode === STORE) ? s_imm_32:
+               (opcode === LOAD) ?  i_imm_32:
+               (opcode === JAL) ? uj_imm_32:
+               (opcode === JALR) ? i_imm_32:
+               (opcode === LUI) ? u_imm_32:
+               (opcode === AUIPC) ? u_imm_32:
+               32'b0;
 
-    case(opcode)
-         R_TYPE: begin
-                    Branch_reg <= 0;
-                    regWrite <= 1;
-                    ALU_B <= 0; //read in from Reg data 2
-                    ALU_A <= 2'b00; //read in from Reg data 1
-                    WBSEL <= 0; //write back data from ALU
-                    memWrite <= 0;
-                    
-                 end
-         I_TYPE: begin
-                    regWrite <= 1;
-                    Branch_reg = 0;
-                    ALU_B <= 1; //read in from IMM32
-                    ALU_A <= 2'b00; //read in from Reg data 1
-                    WBSEL <= 0;
-                    memWrite <= 0;                
-                 end
-         STORE: begin
-                    regWrite <= 0;
-                    Branch_reg <= 0;
-                    ALU_B <= 1; //read in from IMM32
-                    ALU_A <= 2'b00; //read in from Reg data 1
-                    WBSEL <= WBSEL; //doesn't matter
-                    memWrite <= 1; //write to memory
-                end
-         LOAD: begin
-                    regWrite <= 1;
-                    Branch_reg <= 0;
-                    ALU_B <= 1; //read in from IMM32
-                    ALU_A <= 2'b00; //read in from reg data 1
-                    WBSEL <= 1; //write back data from MEMORY
-                    memWrite <= 0; //not writing to memory
-               end
-         BRANCH: begin
-                    regWrite <= 0;
-                    Branch_reg <= 1;
-                    ALU_B <= 0; //read in from reg data 2
-                    ALU_A <= 2'b00; //read in from Reg Data 1
-                    WBSEL <= WBSEL; //doesn't matter
-                    memWrite <= 0; //not writing to memory
-                 end
-         JALR: begin
-                    regWrite <= 1;
-                    Branch_reg <= 0;
-                    ALU_B <= 1; //read in from IMM32
-                    ALU_A <= 2'b00; //read in from reg data 1
-                    WBSEL <= 0; //WB data from ALU
-                    memWrite <= 0; 
-               end
-         JAL: begin
-                    regWrite <= 1;
-                    Branch_reg <=0;
-                    ALU_B <= 1; //read in from IMM32
-                    ALU_A <= 2'b10; //read PC+4
-                    WBSEL <= 0; //WB from ALU
-                    memWrite <=0;
-              end
-         AUIPC: begin
-                    regWrite <= 1;
-                    Branch_reg <= 0;
-                    ALU_B <= 1; //read in from Imm32
-                    ALU_A <= 2'b01 ; //read PC
-                    WBSEL <= 0; //WB from ALU
-                    memWrite <= 0; 
-                end
-         LUI: begin
-                    regWrite <= 1;
-                    Branch_reg <= 0;
-                    ALU_B <= 1; //read in from IMM32
-                    ALU_A <= 2'b00; //NOTE this value should be 0!
-                    WBSEL <= 0; //WB from ALU
-                    memWrite <=0;
-              end                   
-     endcase
-     //for alu control 6-bit input
-     case(opcode)
-         R_TYPE: begin
-                    case(funct3)
-                        3'b000: begin
-                                  if(funct7 == 7'b0100000) 
-                                  begin
-                                        ALU_C = 6'b001000; //SUB c
-                                  end
-                                  else
-                                  begin
-                                        ALU_C = 6'b000000; //ADD c
-                                  end
-                                end
-                        3'b111: ALU_C <= 6'b000111; //AND c
-                        3'b110: ALU_C <= 6'b000110; //OR c
-                        3'b101: ALU_C <= 6'b000101; //SRL
-                        3'b100: ALU_C <= 6'b000100; //XOR
-                        3'b011: ALU_C <= 6'b000010; //SLTU
-                        3'b010: ALU_C <= 6'b000010; //SLT c
-                    endcase
-                end
-         I_TYPE: begin
-                  case(funct3)
-                        3'b000: ALU_C <= 6'b000000; //ADDI
-                        3'b111: ALU_C <= 6'b000111; //ANDI c
-                        3'b110: ALU_C <= 6'b000110; //ORI c
-                        3'b101: ALU_C <= 6'b000101; //SRLI
-                        3'b100: ALU_C <= 6'b000100; //XORI
-                        3'b011: ALU_C <= 6'b000010; //SLTUI
-                        3'b010: ALU_C <= 6'b000010; //SLTI c
-                   endcase
-                 end
-         BRANCH: begin
-                  case(funct3)
-                       3'b000: ALU_C <= 6'b010000; //BEQ
-                       3'b001: ALU_C <= 6'b010001; //BNE
-                       3'b100: ALU_C <= 6'b010100; //BLT
-                       3'b101: ALU_C <= 6'b010101; //BGE
-                       3'b110: ALU_C <= 6'b010110; //BLTU
-                       3'b111: ALU_C <= 6'b010111; //BGEU
-                   endcase
-                 end
-         LOAD: ALU_C <= 000000; //load is just an add
-         STORE: ALU_C <= 000000; //store is just an add
-         LUI: ALU_C <= 000000; //Load upper imm is just an add
-         AUIPC: ALU_C <= 000000; //AUIPC is just an add
-         JALR: ALU_C <= 111111; //pass data A through
-         JAL: ALU_C <= 011111; //pass data A through
-         
-       endcase
-         
-         
-           
-                    
-end
+    
+assign ALU_Control = (opcode === R_TYPE & funct3 === 3'b000 & funct7 === 7'b0100000) ? 6'b001000: //SUB
+                     (opcode === R_TYPE & funct3 === 3'b000 & funct7 === 7'b0000000) ? 6'b000000: //ADD
+                     (opcode === R_TYPE & funct3 === 3'b111) ? 6'b000111:  //AND
+                     (opcode === R_TYPE & funct3 === 3'b110) ? 6'b000110: //OR
+                     (opcode === R_TYPE & funct3 === 3'b101) ? 6'b000101: //SRL
+                     (opcode === R_TYPE & funct3 === 3'b100) ? 6'b000100: //XOR
+                     (opcode === R_TYPE & funct3 === 3'b011) ? 6'b000010: //SLTU
+                     (opcode === R_TYPE & funct3 === 3'b010) ? 6'b000010: // SLT
+                     (opcode === I_TYPE & funct3 === 3'b000) ? 6'b000000: //ADDI
+                     (opcode === I_TYPE & funct3 === 3'b111) ? 6'b000111: //ANDI
+                     (opcode === I_TYPE & funct3 === 3'b110) ? 6'b000110: //ORI
+                     (opcode === I_TYPE & funct3 === 3'b101) ? 6'b000101: // SRLI
+                     (opcode === I_TYPE & funct3 === 3'b100) ? 6'b000100: //XORI
+                     (opcode === I_TYPE & funct3 === 3'b011) ? 6'b000010: //SLTUI
+                     (opcode === I_TYPE & funct3 === 3'b010) ? 6'b000010: //SLTI
+                     (opcode === BRANCH & funct3 === 3'b000) ? 6'b010000: //BEQ
+                     (opcode === BRANCH & funct3 === 3'b001) ? 6'b010001: //BNE
+                     (opcode === BRANCH & funct3 === 3'b100) ? 6'b010100: //BLT
+                     (opcode === BRANCH & funct3 === 3'b101) ? 6'b010101: //BGE
+                     (opcode === BRANCH & funct3 === 3'b110) ? 6'b010110: //BLTU
+                     (opcode === BRANCH & funct3 === 3'b111) ? 6'b010111: //BGEU
+                     opcode === LOAD ? 6'b000000: //load is just an add
+                     opcode === STORE ? 6'b000000: //store is just an add
+                     opcode === LUI ? 6'b000000:   //Load upper imm is just an add
+                     opcode === AUIPC ? 6'b000000: //AUIPC is just an add
+                     opcode === JALR ? 6'b111111:  //pass data A through
+                     opcode === JAL ? 6'b011111:   //pass data A through
+                     6'b000000;           
 
-
-
+//assignment statement for TARGET_PC
+assign target_PC = (opcode === JALR) ? JALR_target: //targetPC for JALR instructions (PC + RS1) 
+                    (opcode == BRANCH) ? imm32*4:
+                    imm32 + (PC+4);
+                       
 endmodule
