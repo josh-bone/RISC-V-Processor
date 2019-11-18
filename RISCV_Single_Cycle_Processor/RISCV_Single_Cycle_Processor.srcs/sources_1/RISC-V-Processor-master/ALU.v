@@ -44,7 +44,7 @@ always @(*)
             
             6'b000100 : result = operand_A ^ operand_B;     //XOR, XORI
             6'b000110 : result = operand_A | operand_B;     //ORI
-            6'b000111 : result = operand_A & operand_B;     //ANDI
+            6'b000111 : result = operand_A & operand_B;     //AND,ANDI
             6'b000001 : result = operand_A << operand_B;    //SLLI, logical shift left Immediate
             6'b000101 : result = operand_A >> operand_B;    //SRLI, Logical shift right immediate
             6'b001101 : result = operand_A >>> operand_B;   //SRAI, Arithmetic shift right immediate

@@ -114,6 +114,7 @@ initial begin
 
   #10
   // Display output of NOP instruction
+  // Remember: want op_A_sel = 00 and op_B_sel = 1 for addi instructions
   $display("addi zero, zero, 0");
   print_state();
   // Test a new instruction
@@ -123,6 +124,7 @@ initial begin
   // Here we are printing the state of the register file.
   // We should see the result of the add a6, a1, a2 instruction but not the
   // sub a7, a2, a4 instruction because there has not been a posedge clock yet
+  // ^ not sure why that comment is there (from default code) because we have not entered either of those instructions yet
   $display("addi a1, zero, -1");
   print_state();
   instruction = 32'b0000000_01100_01011_000_10000_0110011; // add a6, a1, a2
@@ -181,6 +183,8 @@ initial begin
   #10
   $display("jalr ra,196(ra)");
   print_state();
+  
+  
 
 /******************************************************************************
 *                     Add Test Cases Here
