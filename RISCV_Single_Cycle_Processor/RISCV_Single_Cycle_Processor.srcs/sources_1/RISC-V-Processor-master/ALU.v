@@ -14,10 +14,7 @@ module ALU (
 /******************************************************************************
 *                      Start Your Code Here
 ******************************************************************************/
-//reg [31:0] result;
-//reg branch;
-//assign ALU_result = result;
-//assign ALU_branch = branch;
+
 
 assign ALU_branch = (~branch_op) ? 1'b0:                                            //if not branch_op, branch = 0
             (ALU_Control == 6'b010100) ? $signed(operand_A) < $signed(operand_B):   //BLT
