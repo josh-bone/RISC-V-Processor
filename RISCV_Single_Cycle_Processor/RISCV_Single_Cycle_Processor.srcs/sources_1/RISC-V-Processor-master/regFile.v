@@ -20,18 +20,22 @@ reg   [31:0] reg_file[0:31];
 ******************************************************************************/
 assign read_data1 = reg_file[read_sel1];
 assign read_data2 = reg_file[read_sel2];
-
-always @(*)
-begin
-     reg_file[0] <= 32'b0;
-end
+integer i; //for the for-loop
 
 always @(posedge clock)
 begin
-    if(wEn)
+    if(reset)
+    begin
+        for(i=0; i<32; i=i+1) begin
+            reg_file[i] <= 32'b0;
+        end
+    end
+    
+    else if( (wEn == 1) && (write_sel != 5'b0))
     begin
         reg_file[write_sel] <= write_data;
     end
+    
 end
 
 endmodule

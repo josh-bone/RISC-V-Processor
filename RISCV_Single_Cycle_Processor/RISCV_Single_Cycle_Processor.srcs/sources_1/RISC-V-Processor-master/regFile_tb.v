@@ -1,5 +1,5 @@
-// Name: Joshua Bone
-// BU ID: U22742355
+// Name: Joshua Bone, Jonathan Hall
+// BU ID: U22742355, U21798292
 // EC413 Lab 2 Problem 1: Register File Test Bench
 
 module regFile_tb();
@@ -62,6 +62,7 @@ end
 // Test reads and writes to the register file here
 always begin
     #15
+    write_sel = write_sel + 1'b1;
     write_data <= write_data + 1'b1;
     read_sel1 <= read_sel1 + 2'b10;
     read_sel2 <= read_sel2 + 2'b11;
