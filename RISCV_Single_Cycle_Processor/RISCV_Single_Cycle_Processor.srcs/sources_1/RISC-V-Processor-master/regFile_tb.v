@@ -46,12 +46,27 @@ initial begin
   wEn = 1'b1;
   write_sel = 5'b1;
   read_sel1 = 5'b1; //read same value as write, get old value
-  write_data = 1'b0;
+  write_data = 1'b1;
+  
+  #20;
+  write_sel = 5'b0;
+  read_sel1 = 5'b0;
+  read_sel2 = 5'b1;
+  write_data = 32'd333;
+ 
+  #1000
+  $finish();
+  
 end
 
-  // Test reads and writes to the register file here
+// Test reads and writes to the register file here
 always begin
     #15
     write_data <= write_data + 1'b1;
+    read_sel1 <= read_sel1 + 2'b10;
+    read_sel2 <= read_sel2 + 2'b11;
 end
+
+
+
 endmodule

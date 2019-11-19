@@ -1,5 +1,5 @@
-// Name: Your Name
-// BU ID: Your ID
+// Name: Joshua Bone, Jonathan Hall
+// BU ID: U22742355, U21798292
 // EC413 Project: Decode Test Bench
 
 module decode_tb();

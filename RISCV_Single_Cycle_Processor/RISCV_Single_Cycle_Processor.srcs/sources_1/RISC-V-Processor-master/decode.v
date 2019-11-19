@@ -49,21 +49,21 @@ localparam [6:0]R_TYPE  = 7'b0110011, //wEn  //data2
                 LUI     = 7'b0110111; //wEn
 
 
-// These are internal wires that I used. You can use them but you do not have to.
-// Wires you do not use can be deleted.
+// Internal Wires
 wire[6:0]  s_imm_msb;
 wire[4:0]  s_imm_lsb;
 wire[19:0] u_imm;
 wire[11:0] i_imm_orig;
-//wire[19:0] uj_imm;
 wire[11:0] s_imm_orig;
-wire[12:0] sb_imm_orig;
+wire[12:0] b_imm_orig;
+wire[19:0] lui_imm;
 
-wire[31:0] sb_imm_32;
+wire[31:0] b_imm_32;
 wire[31:0] u_imm_32;
 wire[31:0] i_imm_32;
 wire[31:0] s_imm_32;
 wire[31:0] uj_imm_32;
+wire[31:0] lui_imm_32;
 
 wire [6:0] opcode;
 wire [6:0] funct7;
@@ -75,7 +75,7 @@ wire [ADDRESS_BITS-1:0] JAL_target;
 
 // Read registers
 assign read_sel2  = instruction[24:20];
-assign read_sel1  = instruction[19:15];
+assign read_sel1  = (opcode == LUI) ? 5'b0 : instruction[19:15]; //Adding x0 to upper instruction in ALU, in order to writeback the lui_imm_32
 
 /* Instruction decoding */
 assign opcode = instruction[6:0];
@@ -89,7 +89,6 @@ assign write_sel = instruction[11:7];
 /******************************************************************************
 *                      Start Your Code Here
 ******************************************************************************/
-//first assigning values that are input regardless of instruction type
 
 //I-type imm's
 assign i_imm_orig = instruction[31:20];
@@ -102,8 +101,15 @@ assign s_imm_32 = {{20{s_imm_orig[11]}},s_imm_orig};
 //U-type imm's
 assign u_imm = instruction[31:12];
 assign u_imm_32 = { {12{u_imm[19]}},u_imm };
-//imm for JAL (really wonky)
-assign uj_imm_32 = { {11{u_imm[19]}},{u_imm[19]},{u_imm[7:0]},{u_imm[8]},{u_imm[18:9]},1'b0 }; //NOT CURRENTLY WORKING PROPERLY!!
+//Branch imm's
+//Note: we have assumed that the immediate value provided for branch instructions only needs shifted left once.
+assign b_imm_orig = { instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0 }; //shift left 1
+assign b_imm_32 = { {19{b_imm_orig[11]}}, b_imm_orig }; 
+//imm for JAL
+assign uj_imm_32 = { {11{u_imm[19]}},{u_imm[19]},{u_imm[7:0]},{u_imm[8]},{u_imm[18:9]},1'b0 };
+//imm for LUI
+assign lui_imm = instruction[31:12];
+assign lui_imm_32 = { lui_imm, 12'b0 };
 
 assign next_PC_select = (branch===1) ? 1'b1:
                         (opcode===JAL) ? 1'b1:
@@ -137,9 +143,9 @@ assign op_A_sel = (opcode === R_TYPE)? 2'b00:
              (opcode === STORE) ? 2'b00:
              (opcode === LOAD) ? 2'b00:
              (opcode === BRANCH) ? 2'b00:
-             (opcode === JAL) ? 2'b10:  //put PC+4 in rd
-             (opcode === JALR) ? 2'b10: //put PC+4 in rd
-             (opcode === LUI) ? 2'b00: //NOTE this value should be 0!
+             (opcode === JAL) ? 2'b10:      //put PC+4 in rd
+             (opcode === JALR) ? 2'b10:     //put PC+4 in rd
+             (opcode === LUI) ? 2'b00:      //Select x0
              (opcode === AUIPC) ? 2'b01:
               2'b00;
               
@@ -157,8 +163,9 @@ assign imm32 = (opcode == I_TYPE) ? i_imm_32:
                (opcode === LOAD) ?  i_imm_32:
                (opcode === JAL) ? uj_imm_32:
                (opcode === JALR) ? i_imm_32:
-               (opcode === LUI) ? u_imm_32:
-               (opcode === AUIPC) ? u_imm_32:
+               (opcode === LUI) ? lui_imm_32:
+               (opcode === AUIPC) ? lui_imm_32:
+               (opcode == BRANCH) ? b_imm_32:
                32'b0;
 
     
@@ -192,8 +199,8 @@ assign ALU_Control = (opcode === R_TYPE & funct3 === 3'b000 & funct7 === 7'b0100
                      6'b000000;           
 
 //assignment statement for TARGET_PC
-assign target_PC = (opcode === JALR) ? JALR_target: //targetPC for JALR instructions (PC + RS1) 
-                    (opcode == BRANCH) ? imm32*4:
+assign target_PC = (opcode == JALR) ? JALR_target: //targetPC for JALR instructions (PC + RS1) 
+                    (opcode == BRANCH) ? b_imm_32 + PC :
                     imm32 + (PC+4);
-                       
+            
 endmodule
