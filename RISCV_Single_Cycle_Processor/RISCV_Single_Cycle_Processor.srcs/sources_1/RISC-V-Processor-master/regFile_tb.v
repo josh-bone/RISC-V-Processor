@@ -41,33 +41,44 @@ initial begin
   clock = 1'b1;
   reset = 1'b1;
   
+  //write first
   #20;
   reset = 1'b0;
   wEn = 1'b1;
-  write_sel = 5'b1;
+  write_sel = 5'b00001;
   read_sel1 = 5'b1; //read same value as write, get old value
-  write_data = 1'b1;
-  
-  #20;
-  write_sel = 5'b0;
-  read_sel1 = 5'b0;
-  read_sel2 = 5'b1;
-  write_data = 32'd333;
- 
-  #1000
-  $finish();
+  write_data = 32'h000F;
+  #10
+  write_sel = 5'b00010;
+  write_data = 32'h0001;
+  #10
+  write_sel = 5'b00011;
+  write_data = 32'h0002;
+  #10
+  write_sel = 5'b00100;
+  write_data = 32'hFFFFFFFF;
+  #10
+  wEn = 1'b0;
+  #10
+  read_sel1 = 5'b00010; //should be 0001
+  read_sel2 = 5'b00100; //should be all 1's (hex: FFFFFFFF)
+  #20
+  //try writing to reg 0
+  write_sel = 5'b00000;
+  wEn = 1'b1;
+  write_data = 32'hDEADBEEF;
+  read_sel1 = 5'b00000;
+  #10
+  wEn = 1'b0;
+  #10
+  read_sel1 = 5'b00000; //should be 0
+  read_sel2 = 5'b00000; //should be 0
   
 end
 
-// Test reads and writes to the register file here
+  // Test reads and writes to the register file here
 always begin
     #15
-    write_sel = write_sel + 1'b1;
     write_data <= write_data + 1'b1;
-    read_sel1 <= read_sel1 + 2'b10;
-    read_sel2 <= read_sel2 + 2'b11;
 end
-
-
-
 endmodule
