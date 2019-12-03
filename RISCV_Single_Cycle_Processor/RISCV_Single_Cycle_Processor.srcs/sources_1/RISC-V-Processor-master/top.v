@@ -1,5 +1,5 @@
 // Name: Joshua Bone, Jonathan Hall
-// BU ID: U  ,U21798292
+// BU ID: U22742355,U21798292
 // EC413 Project: Top Level Module
 
 module top #(
@@ -34,12 +34,12 @@ wire [5:0] ALU_Control;
 wire [4:0] read_Sel_1;
 wire [4:0] read_Sel_2;
 wire wEn;
-wire write_Sel;
+wire [4:0] write_Sel;
 wire mem_wEn;
 wire branch_OP;
 // Reg File Wires -----------------------------------------------------------------
-wire read_Data_1; //TO ALU A MUX
-wire read_Data_2; //TO ALU B MUX
+wire [31:0] read_Data_1; //TO ALU A MUX
+wire [31:0] read_Data_2; //TO ALU B MUX
 //mem write back wires
 wire wb_Sel;
 // Execute Wires
@@ -94,7 +94,7 @@ decode #(
   .instruction(Instruction),
 
   // Inputs from Execute/ALU
-  .JALR_target(ALU_Res), // CHECK THIS
+  .JALR_target(ALU_Res), //ALU_Res is 32 bits but JALR_target is 16 bits
   .branch(branch),
 
   // Outputs to Fetch
@@ -159,8 +159,8 @@ ram #(
 
   // Data Port
   .wEn(mem_wEn),
-  .d_address(ALU_Res),
-  .d_write_data(read_Data_2),
+  .d_address(ALU_Res), //ALU_Res is 32 bits but d_address is 16 bits
+  .d_write_data(read_Data_2), //why
   .d_read_data(d_Read_Data)
 );
 
