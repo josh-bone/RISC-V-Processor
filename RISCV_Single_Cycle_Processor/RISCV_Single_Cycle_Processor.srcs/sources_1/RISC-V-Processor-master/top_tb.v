@@ -1,8 +1,6 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355,U21798292
 // EC413 Project: Top Level Module Test Bench
-`timescale 1ns / 1ps
-
 module top_tb();
 
 reg clock;
@@ -35,6 +33,8 @@ initial begin
   clock = 1'b1;
   reset = 1'b1;
 
+    print_state();
+
   // Make sure the .vmh file is in the same directory that you launched the
   // simulation from.
   $readmemh("./fibonacci.vmh", dut.main_memory.ram); // Should put 0x00000015 in register x9
@@ -46,11 +46,13 @@ initial begin
 
   #1
   #20
-  reset = 1'b0;
+  reset = 1'b0; //PC now at 0, should begin executing instructions
 
-  #16000
+  #800
   print_state();
-
+ 
+    #100
+    $display("done!\n");
   $stop();
 
 end

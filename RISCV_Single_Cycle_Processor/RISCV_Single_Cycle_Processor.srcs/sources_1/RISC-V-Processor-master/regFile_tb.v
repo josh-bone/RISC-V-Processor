@@ -1,7 +1,6 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355, U21798292
 // EC413 Lab 2 Problem 1: Register File Test Bench
-`timescale 1ns / 1ps
 
 module regFile_tb();
 

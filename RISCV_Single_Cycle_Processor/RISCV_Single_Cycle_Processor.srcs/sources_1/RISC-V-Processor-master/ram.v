@@ -1,7 +1,6 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355,U21798292
 // EC413 Project: Ram Module
-`timescale 1ns / 1ps
 
 module ram #(
   parameter DATA_WIDTH = 32,

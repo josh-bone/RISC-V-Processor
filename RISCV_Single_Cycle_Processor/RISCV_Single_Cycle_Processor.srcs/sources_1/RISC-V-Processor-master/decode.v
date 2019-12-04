@@ -1,7 +1,6 @@
 // Name: Josh Bone, Jonathan Hall
 // BU ID: U22742355, U21798292
 // EC413 Project: Decode Module
-`timescale 1ns / 1ps
 
 module decode #(
   parameter ADDRESS_BITS = 16  //parameters are constants, thus you cant change their value at runtime <- note 
@@ -200,7 +199,7 @@ assign ALU_Control = (opcode === R_TYPE & funct3 === 3'b000 & funct7 === 7'b0100
                      6'b000000;           
 
 //assignment statement for TARGET_PC
-assign target_PC = (opcode == JALR) ? JALR_target : //targetPC for JALR instructions (PC + RS1) 
+assign target_PC = (opcode == JALR) ? {{JALR_target[15:1]}, 1'b0}: //targetPC for JALR instructions (PC + RS1) 
                     (opcode == BRANCH) ? b_imm_32 + PC:
                     imm32 + (PC+4);
             

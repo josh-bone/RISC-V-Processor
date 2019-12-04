@@ -1,7 +1,6 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355,U21798292
 // EC413 Project: Top Level Module
-`timescale 1ns / 1ps
 
 module top #(
   parameter ADDRESS_BITS = 16
@@ -9,8 +8,6 @@ module top #(
   input clock,
   input reset,
   
-  //input [31:0] instruction???
-
   output [31:0] wb_data
 );
 
@@ -46,6 +43,7 @@ wire [31:0] read_Data_2; //TO ALU B MUX
 //mem write back wires
 wire wb_Sel;
 // Execute Wires
+wire [31:0] JALR_target_long;
 wire [ADDRESS_BITS-1:0] JALR_target; // Assigned outside of ALU
 wire [31:0] ALU_Res;
 wire branch;
@@ -63,6 +61,9 @@ wire [31:0] d_Read_Data;
 
 assign wb_data = reg_WB_Data; 
 
+assign JALR_target_long = imm32 + read_Data_1;
+assign JALR_target = JALR_target_long[ADDRESS_BITS-1:0];
+
 //mux for OP A and OP B - ask if in the right place
 //These values are input into ALU.
 assign OP_A_IN = (op_A_sel === 2'b00) ? read_Data_1:
@@ -73,12 +74,10 @@ assign OP_B_IN = (op_B_sel === 1'b0) ? read_Data_2:
                  (op_B_sel === 1'b1) ? imm32:
                  imm32;
 //assign mux to what is written back to REG
-assign reg_WB_Data = (wb_Sel == 1'b0) ? ALU_Res:
-                     (wb_Sel == 1'b1) ? d_Read_Data: //only from a load instruction.
+assign reg_WB_Data = (wb_Sel === 1'b0) ? ALU_Res:
+                     (wb_Sel === 1'b1) ? d_Read_Data: //only from a load instruction.
                       ALU_Res;
- 
-assign JALR_target = {ALU_Res[11:1], 1'b0}; //ignore LSB
- 
+  
 //DONE but needs to be checked
 fetch #(
   .ADDRESS_BITS(ADDRESS_BITS)
@@ -160,7 +159,7 @@ ram #(
   .clock(clock),
 
   // Instruction Port
-  .i_address(PC),
+  .i_address(PC >> 2),
   .i_read_data(Instruction),
 
   // Data Port

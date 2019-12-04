@@ -1,7 +1,6 @@
 // Name: Joshua Bone , Jonathan Hall
 // BU ID: U22742355, U21798292
 // EC413 Lab 2 Problem 2: ALU Test Bench
-`timescale 1ns / 1ps
 
 module ALU_tb();
 
@@ -100,9 +99,9 @@ initial begin
   //JALR
   ctrl = 6'b111111; 
   opA = 20;
-  opB = -200;
+  opB = 13;
   #10
-  $display("Jump and Link. ALU_result = %d", result); //should be 20 (JALR passes opA)
+  $display("Jump and Link. ALU_result = %d", result); //should be 33 (our JALR adds opA + opB, where opB is the 12-bit signed immediate)
 
   
   

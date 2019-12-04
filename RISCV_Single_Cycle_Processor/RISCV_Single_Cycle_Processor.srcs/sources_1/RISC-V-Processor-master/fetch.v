@@ -1,7 +1,6 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355, U21798292
 // EC413 Project: Fetch Module
-`timescale 1ns / 1ps
 
 module fetch #(
   parameter ADDRESS_BITS = 16
@@ -27,7 +26,7 @@ begin
     begin
         PC_reg <= 16'b0; //not sure what should happen if reset = 0, just set PC to 16'b0.
     end
-    if(next_PC_select)
+    else if(next_PC_select)
     begin
         PC_reg <= target_PC; 
     end

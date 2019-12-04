@@ -1,6 +1,5 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355, U21798292
-`timescale 1ns / 1ps
 
 module regFile (
   input clock,

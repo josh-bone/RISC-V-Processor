@@ -1,7 +1,6 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355,U21798292
 // EC413 Project: Ram Test Bench
-`timescale 1ns / 1ps
 
 module ram_tb();
 
@@ -20,6 +19,7 @@ reg  [ADDR_WIDTH-1:0] d_address;
 reg  [DATA_WIDTH-1:0] d_write_data;
 wire [DATA_WIDTH-1:0] d_read_data;
 
+integer x;
 
 ram #(
   .DATA_WIDTH(DATA_WIDTH),
@@ -65,16 +65,38 @@ initial begin
   /***************************
   * Add more test cases here *
   ***************************/
-  //note: can't test instruction port because no there is no means of writing instructions
-  #10
-  d_address = 41;
-  #10
-  $display("Instruction Address %d: %h", d_address, i_read_data);
-  i_address = 18;
+  $readmemh("./fibonacci.vmh", uut.ram); // Should put 0x00000015 in register x9
+  //$readmemh("./gcd.vmh", uut.ram); // Should put 0x00000010 in register x9
+  
+  #300
+  i_address = 0;
+  $display("Instruction Address %d: %h", i_address, i_read_data);
+  
+  i_address = 1;
   #10
   $display("Instruction Address %d: %h", i_address, i_read_data);
+  
+    i_address = 2;
+    #10
+    $display("Instruction Address %d: %h", i_address, i_read_data);
+  
+     i_address = 3;
+     #10
+     $display("Instruction Address %d: %h", i_address, i_read_data);
+      
+     i_address = 4;
+     #10
+     $display("Instruction Address %d: %h", i_address, i_read_data);
 
-
+     i_address = 5;
+     #10
+     $display("Instruction Address %d: %h", i_address, i_read_data);
+          
+     i_address = 6;
+     #10
+     $display("Instruction Address %d: %h", i_address, i_read_data);
+      
+      
   #100
   $stop();
 
