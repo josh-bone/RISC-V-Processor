@@ -1,6 +1,7 @@
 // Name: Joshua Bone, Jonathan Hall
-// BU ID: U , U21798292
+// BU ID: U22742355, U21798292
 // EC413 Project: Fetch Module
+`timescale 1ns / 1ps
 
 module fetch #(
   parameter ADDRESS_BITS = 16
@@ -32,7 +33,7 @@ begin
     end
     else
     begin
-        PC_reg <= PC + 4; //is this legal? 
+        PC_reg <= PC + 4;
     end
 end
 

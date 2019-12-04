@@ -1,6 +1,7 @@
-// Name: Your Name
-// BU ID: Your ID
+// Name: Joshua Bone, Jonathan Hall
+// BU ID: U22742355,U21798292
 // EC413 Project: Top Level Module Test Bench
+`timescale 1ns / 1ps
 
 module top_tb();
 

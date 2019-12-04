@@ -1,6 +1,7 @@
 // Name: Joshua Bone , Jonathan Hall
 // BU ID: U22742355, U21798292
 // EC413 Lab 2 Problem 2: ALU Test Bench
+`timescale 1ns / 1ps
 
 module ALU_tb();
 

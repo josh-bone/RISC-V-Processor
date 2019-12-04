@@ -1,6 +1,7 @@
 // Name: Joshua Bone, Jonathan Hall
-// BU ID: U, U21798292
+// BU ID: U22742355,U21798292
 // EC413 Project: Fetch Test Bench
+`timescale 1ns / 1ps
 
 module fetch_tb();
 

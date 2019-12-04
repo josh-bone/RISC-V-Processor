@@ -1,6 +1,7 @@
 // Joshua Bone, Jonathan Hall
 // BU ID: U22742355, U21798292
-// EC413 Lab 2 Problem 2: ALU
+// EC413 Project: ALU Module
+`timescale 1ns / 1ps
 
 module ALU (
   input [5:0]  ALU_Control,
@@ -26,8 +27,9 @@ assign ALU_branch = (~branch_op) ? 1'b0:                                        
             0;                                                                      //default to not branching
 
 assign ALU_result = (ALU_Control == 6'b000000) ? operand_A + operand_B:             //ADD
+            (ALU_Control == 6'b111111) ? operand_A + operand_B:                     //JALR (following TA's directive from discussion, though the project description says to pass operand_A)
             (ALU_Control == 6'b001000) ? operand_A - operand_B:                     //SUB
-            (ALU_Control == 6'bx11111) ? operand_A:                                 //JAL & JALR, both pass operand_A (x is a dont care)
+            (ALU_Control == 6'b011111) ? operand_A:                                 //JAL, pass operand_A (x is a dont care)
             (ALU_Control == 6'b000010) ? $signed(operand_A) < $signed(operand_B):   //SLT, SLTI
             (ALU_Control == 6'b000011) ? operand_A < operand_B:                     //SLTIU, SLTU
             (ALU_Control == 6'b000100) ? operand_A ^ operand_B:                     //XOR, XORI

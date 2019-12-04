@@ -1,6 +1,7 @@
-// Name: Your Name
-// BU ID: Your ID
+// Name: Joshua Bone, Jonathan Hall
+// BU ID: U22742355,U21798292
 // EC413 Project: Ram Module
+`timescale 1ns / 1ps
 
 module ram #(
   parameter DATA_WIDTH = 32,
@@ -20,7 +21,7 @@ module ram #(
 
 );
 
-localparam RAM_DEPTH = 1 << ADDR_WIDTH; // this code looks like it right shifts 1 by 16 places. Thus there are 2^16 addresses
+localparam RAM_DEPTH = 1 << ADDR_WIDTH; // right shifts 1 by 16 places. Thus there are 2^16 addresses
 
 reg [DATA_WIDTH-1:0] ram [0:RAM_DEPTH-1];
 
@@ -28,14 +29,12 @@ reg [DATA_WIDTH-1:0] ram [0:RAM_DEPTH-1];
 *                      Start Your Code Here
 ******************************************************************************/
 
-//first, the combinational read in the add
-//ask if this is ok, check it over.
+//combinational read instruction
 assign i_read_data = ram[i_address];
 
 assign d_read_data = ram[d_address];
 
-//now sequential write
-//this should be good
+//sequential write data
 always @(posedge clock)
 begin
     if(wEn)

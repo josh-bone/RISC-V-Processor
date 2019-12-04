@@ -1,12 +1,15 @@
 // Name: Joshua Bone, Jonathan Hall
 // BU ID: U22742355,U21798292
 // EC413 Project: Top Level Module
+`timescale 1ns / 1ps
 
 module top #(
   parameter ADDRESS_BITS = 16
 ) (
   input clock,
   input reset,
+  
+  //input [31:0] instruction???
 
   output [31:0] wb_data
 );
@@ -54,10 +57,11 @@ wire [31:0] OP_A_IN;
 wire [31:0] OP_B_IN;
 
 // Memory Wires
-   //OUTPUT FROM RAM - INSTRUCTION
+//OUTPUT FROM RAM - INSTRUCTION
 wire [31:0] Instruction;
 wire [31:0] d_Read_Data;
-// Writeback wires
+
+assign wb_data = reg_WB_Data; 
 
 //mux for OP A and OP B - ask if in the right place
 //These values are input into ALU.
@@ -69,10 +73,12 @@ assign OP_B_IN = (op_B_sel === 1'b0) ? read_Data_2:
                  (op_B_sel === 1'b1) ? imm32:
                  imm32;
 //assign mux to what is written back to REG
-assign reg_WB_Data = (wb_Sel === 1'b0) ? ALU_Res:
-                     (wb_Sel === 1'b1) ? d_Read_Data: //only from a load instruction.
+assign reg_WB_Data = (wb_Sel == 1'b0) ? ALU_Res:
+                     (wb_Sel == 1'b1) ? d_Read_Data: //only from a load instruction.
                       ALU_Res;
-
+ 
+assign JALR_target = {ALU_Res[11:1], 1'b0}; //ignore LSB
+ 
 //DONE but needs to be checked
 fetch #(
   .ADDRESS_BITS(ADDRESS_BITS)
@@ -94,7 +100,7 @@ decode #(
   .instruction(Instruction),
 
   // Inputs from Execute/ALU
-  .JALR_target(ALU_Res), //ALU_Res is 32 bits but JALR_target is 16 bits
+  .JALR_target(JALR_target), 
   .branch(branch),
 
   // Outputs to Fetch
@@ -128,7 +134,7 @@ regFile regFile_inst (
   .clock(clock),
   .reset(reset),
   .wEn(wEn), // Write Enable
-  .write_data(reg_WB_data),
+  .write_data(reg_WB_Data),
   .read_sel1(read_Sel_1),
   .read_sel2(read_Sel_2),
   .write_sel(write_Sel),
@@ -159,8 +165,8 @@ ram #(
 
   // Data Port
   .wEn(mem_wEn),
-  .d_address(ALU_Res), //ALU_Res is 32 bits but d_address is 16 bits
-  .d_write_data(read_Data_2), //why
+  .d_address(ALU_Res[15:0]),    //ALU_Res is 32 bits but d_address is 16 bits
+  .d_write_data(read_Data_2),   //write data comes from rs2 for load/store operations
   .d_read_data(d_Read_Data)
 );
 

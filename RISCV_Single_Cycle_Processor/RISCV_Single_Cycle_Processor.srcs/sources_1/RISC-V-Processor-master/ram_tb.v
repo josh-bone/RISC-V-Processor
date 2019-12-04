@@ -1,6 +1,7 @@
-// Name: Your Name
-// BU ID: Your ID
+// Name: Joshua Bone, Jonathan Hall
+// BU ID: U22742355,U21798292
 // EC413 Project: Ram Test Bench
+`timescale 1ns / 1ps
 
 module ram_tb();
 
@@ -50,20 +51,28 @@ initial begin
   #10
   wEn = 1'b1;
   #10
-  $display("Data Address %d: %h", d_address, d_read_data);
+  $display("Data Address %d: %h", d_address, d_read_data); //Data Address     0: 00000000
   d_write_data = 1;
   d_address = 4;
   #10
-  $display("Data Address %d: %h", d_address, d_read_data);
+  $display("Data Address %d: %h", d_address, d_read_data); //Data Address     4: 00000001
   d_write_data = 2;
   d_address = 8;
   #10
-  $display("Data Address %d: %h", d_address, d_read_data);
+  $display("Data Address %d: %h", d_address, d_read_data); //Data Address     8: 00000002
 
 
   /***************************
   * Add more test cases here *
   ***************************/
+  //note: can't test instruction port because no there is no means of writing instructions
+  #10
+  d_address = 41;
+  #10
+  $display("Instruction Address %d: %h", d_address, i_read_data);
+  i_address = 18;
+  #10
+  $display("Instruction Address %d: %h", i_address, i_read_data);
 
 
   #100
