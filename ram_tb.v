@@ -68,7 +68,7 @@ initial begin
   $readmemh("./fibonacci.vmh", uut.ram); // Should put 0x00000015 in register x9
   //$readmemh("./gcd.vmh", uut.ram); // Should put 0x00000010 in register x9
   
-  #300
+  #200
   i_address = 0;
   $display("Instruction Address %d: %h", i_address, i_read_data);
   
@@ -96,7 +96,36 @@ initial begin
      #10
      $display("Instruction Address %d: %h", i_address, i_read_data);
       
+   //testing writing and reading to d-address
+   
+   #50
+   wEn = 1;
+   #10
+   d_address = 200;
+   d_write_data = 32'hDEADBEEF;
+   
+   #10
+   d_address = 201;
+   d_write_data = 32'hBEEFDEAD;
+   #10
+   d_address = 202;
+   d_write_data = 32'hBEDEADEF;
       
+      
+   #10
+   wEn = 0;
+   #10
+   d_address= 200;
+   #10
+   $display("Instruction Address %d: %h", d_address, d_read_data);
+   #10
+   d_address= 201;
+   #10
+   $display("Instruction Address %d: %h", d_address, d_read_data);
+  #10
+  d_address= 202;
+  #10
+  $display("Instruction Address %d: %h", d_address, d_read_data);
   #100
   $stop();
 

@@ -35,15 +35,29 @@ initial begin
   #10
   reset = 1'b0;
   next_PC_select = 1'b0;
-
+    
+  target_PC = 16'hFF00;
   #10
   $display("PC: %h", PC);
 
   /***************************
   * Add more test cases here *
   ***************************/
-
-
+   #100
+    //wait 10 clock cycles - PC should be 0004 + 0028 = 002c
+    $display("PC: %h", PC);
+    #5
+    next_PC_select = 1'b1;
+    //we should jump to FF00 in next clock cycle
+    #5
+    $display("PC: %h", PC);
+    next_PC_select = 1'b0;
+    #20
+    
+    //wait 2 clock cycles - PC should be FF00 + 0008 = FF08
+    $display("PC: %h", PC);
+    
+    
   #100
   $stop();
 
