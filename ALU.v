@@ -36,6 +36,7 @@ assign ALU_result = (ALU_Control == 6'b000000) ? operand_A + operand_B:         
             (ALU_Control == 6'b000001) ? operand_A << operand_B:                    //SLLI, logical shift left Immediate
             (ALU_Control == 6'b000101) ? operand_A >> operand_B:                    //SRLI, Logical shift right immediate
             (ALU_Control == 6'b001101) ? operand_A >>> operand_B:                   //SRAI, Arithmetic shift right immediate
+            (branch_op) ? 32'hdddddddd:                                             //will show when branches are executed
             32'hFFFFFFFF;                                                           //de facto error code
 
 endmodule

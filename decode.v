@@ -201,6 +201,6 @@ assign ALU_Control = (opcode === R_TYPE & funct3 === 3'b000 & funct7 === 7'b0100
 //assignment statement for TARGET_PC
 assign target_PC = (opcode == JALR) ? {{JALR_target[15:1]}, 1'b0}: //targetPC for JALR instructions (PC + RS1) 
                     (opcode == BRANCH) ? b_imm_32 + PC:
-                    imm32 + (PC+4);
+                    imm32 + PC;
             
 endmodule
